@@ -25,6 +25,14 @@ class User(db.Model, SerializerMixin):
 
     def authenticate(self, password):
         return bcrypt.check_password_hash(self._password_hash, password)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'image_url': self.image_url,
+            'bio': self.bio
+        }
 
 class Recipe(db.Model, SerializerMixin):
     __tablename__ = 'recipes'
@@ -34,6 +42,8 @@ class Recipe(db.Model, SerializerMixin):
     instructions = db.Column(db.String, nullable=False)
     minutes_to_complete = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    user = db.relationship('User', back_populates='recipes')
 
     @validates('instructions')
     def validate_instructions(self, key, instructions):

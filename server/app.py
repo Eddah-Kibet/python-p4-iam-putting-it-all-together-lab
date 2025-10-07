@@ -8,30 +8,35 @@ from config import app, db, api
 from models import User, Recipe
 
 class Signup(Resource):
-    def post(self):
+    def post():
         try:
             data = request.get_json()
+            
+            # Validate required fields
+            if not data.get('username') or not data.get('password'):
+                return {'error': 'Username and password are required'}, 422
+                
+            # Check if username already exists
+            if User.query.filter_by(username=data['username']).first():
+                return {'error': 'Username already exists'}, 422
+                
             user = User(
-                username=data.get('username'),
-                image_url=data.get('image_url'),
-                bio=data.get('bio')
+                username=data['username'],
+                image_url=data.get('image_url', ''),
+                bio=data.get('bio', '')
             )
-            # use setter to hash
-            user.password_hash = data.get('password')
-
+            user.password_hash = data['password']
+            
             db.session.add(user)
             db.session.commit()
-
+            
             session['user_id'] = user.id
-
-            return user.to_dict(only=('id','username','image_url','bio')), 201
-        except IntegrityError as e:
-            db.session.rollback()
-            return {'errors': ['Username must be unique and present']}, 422
+            
+            return user.to_dict(), 201
+            
         except Exception as e:
             db.session.rollback()
-            # assume validation error
-            return {'errors': [str(e)]}, 422
+            return {'error': str(e)}, 422
 
 class CheckSession(Resource):
     def get(self):
