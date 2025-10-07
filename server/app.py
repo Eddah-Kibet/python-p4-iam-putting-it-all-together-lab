@@ -8,7 +8,7 @@ from config import app, db, api
 from models import User, Recipe
 
 class Signup(Resource):
-     def post(self):
+    def post(self):
         try:
             data = request.get_json()
             user = User(
@@ -34,7 +34,7 @@ class Signup(Resource):
             return {'errors': [str(e)]}, 422
 
 class CheckSession(Resource):
-     def get(self):
+    def get(self):
         user_id = session.get('user_id')
         if user_id:
             user = db.session.get(User, user_id)
@@ -43,7 +43,7 @@ class CheckSession(Resource):
         return {'error': 'Unauthorized'}, 401
 
 class Login(Resource):
-     def post(self):
+    def post(self):
         data = request.get_json()
         user = User.query.filter(User.username == data.get('username')).first()
         if user and user.authenticate(data.get('password')):
@@ -52,7 +52,7 @@ class Login(Resource):
         return {'error': 'Invalid username or password'}, 401
 
 class Logout(Resource):
-     def delete(self):
+    def delete(self):
         if session.get('user_id'):
             session['user_id'] = None
             return '', 204
